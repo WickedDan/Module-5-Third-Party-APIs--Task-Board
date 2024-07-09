@@ -25,20 +25,30 @@ function createTaskCard(task) {
     taskContainer.appendChild(descriptionEl);
     taskContainer.appendChild(dueDateEl);
     taskContainer.className="taskCard"
+    taskContainer.style.zIndex = "100";
     return taskContainer;
-
- 
 
 }
 
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
-// Make a task card for each task
+
+const projects = generateTaskId();
+
+  const todoList = $('#to-do');
+  todoList.empty();
+
+  const inProgressList = $('#in-progress');
+  inProgressList.empty();
+
+  const doneList = $('#done');
+  doneList.empty();
+  
 for (let index = 0; index < taskList.length; index++) {
     const task = taskList[index];
     let taskEl = createTaskCard(task);
     console.log(taskEl);
-    document.getElementById("todo-cards").appendChild(taskEl);
+    document.getElementById("to-do").appendChild(taskEl);
 }
 
 $(".taskCard" ).draggable({ opacity: 0.7, helper: "clone"});
@@ -59,13 +69,12 @@ let newTask ={
     title: taskTitle.value,
     description: taskDes.value,
     dueDate: taskDue.value,
-    // z index 100
 }
-// Add new task to list pf tasks
+
 taskList.push(newTask)
-// Store task list on list of task in local storage
+
 localStorage.setItem("tasks", JSON.stringify(taskList))
-// Hide the box
+
 $('#formModal').modal('toggle')
 
 renderTaskList();
@@ -73,17 +82,46 @@ renderTaskList();
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event){
+    const projectId = $(this).attr('data-project-id');
+    const projects = generateTaskId();
+  
+    
+    projects.forEach((project) => {
+      if (project.id === taskId) {
+        projects.splice(projects.indexOf(project), 1);
+      }
+    });
+    saveProjectsToStorage(projects);
+    printProjectData();
 
 }
 
 // Todo: create a function to handle dropping a task into a new status lane
 function handleDrop(event, ui) {
-    alert( "dropped" );
+
+const projects = generateTaskId();
+
+
+const taskId = ui.draggable[0].dataset.nextId;
+
+
+const newStatus = event.target.id;
+
+for (let project of projects) {
+ 
+  if (project.id === taskId) {
+    project.status = newStatus;
+  }
+}
+
+localStorage.setItem('projects', JSON.stringify(projects));
+printProjectData();
 
 }
 
 // Todo: when the page loads, render the task list, add event listeners, 
 // make lanes droppable, and make the due date field a date picker
+
 $(document).ready(function () {
     renderTaskList();
 let addTaskButton= document.getElementById("next");
